@@ -1,0 +1,48 @@
+{
+  "name": "jasotacademy/file-version-control",
+  "description": "A Laravel library for file version control",
+  "type": "library",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Jasotacademy",
+      "email": "jasotacademy@gmail.com"
+    }
+  ],
+  "require": {
+    "php": ">=8.0",
+    "illuminate/support": "^9.0 || ^10.0 || ^11.0"
+  },
+  "require-dev": {
+    "orchestra/testbench": "^7.0 || ^8.0 || ^9.0",
+    "pestphp/pest": "^2.0",
+    "pestphp/pest-plugin-laravel": "^2.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "Jasotacademy\\FileVersionControl\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Jasotacademy\\FileVersionControl\\Tests\\": "tests/"
+    }
+  },
+  "extra": {
+    "laravel": {
+      "providers": [
+        "Jasotacademy\\FileVersionControl\\FileVersionControlServiceProvider"
+      ],
+      "aliases": {
+        "FileVersionControl": "Jasotacademy\\FileVersionControl\\Facades\\FileVersionControl"
+      }
+    }
+  },
+  "minimum-stability": "dev",
+  "prefer-stable": true,
+  "config": {
+    "allow-plugins": {
+      "pestphp/pest-plugin": true
+    }
+  }
+}
