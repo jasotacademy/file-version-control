@@ -8,30 +8,23 @@ use Jasotacademy\FileVersionControl\Models\FileVersion;
 
 class FileVersionService
 {
-    public function uploadVersion($uploadedFile, $fileId, $metadata = []): void
+    public function uploadVersion($file, $fileId, $metadata = []): FileVersion
     {
-        $file = File::findOrFail($fileId);
         $disk = config('file_version_control.storage_disk');
         $versionNumber = $this->getNextVersionNumber($fileId);
 
-        $path = "files/$fileId/v{$versionNumber}_" . $uploadedFile->getClientOriginalName();
+        $path = "files/$fileId/v{$versionNumber}_" . $file->getClientOriginalName();
 
-        Storage::disk($disk)->put($path, file_get_contents($uploadedFile));
+        Storage::disk($disk)->put($path, file_get_contents($file));
 
-        $file->versions()->create([
-            'version' => $versionNumber,
+        return FileVersion::create([
+            'version_number' => $versionNumber,
             'path' => $path,
-            'filename' => $uploadedFile->getClientOriginalName(),
-            'mime_type' => $uploadedFile->getMimeType(),
+            'filename' => $file->getClientOriginalName(),
+            'mime_type' => $file->getMimeType(),
             'metadata' => $metadata,
-            'size' => $uploadedFile->getSize(),
+            'size' => $file->getSize(),
             'created_by' => auth()->id(),
-        ]);
-
-        $file->update([
-            'path' => $path,
-            'size' => $uploadedFile->getSize(),
-            'mime_type' => $uploadedFile->getMimeType(),
         ]);
     }
 

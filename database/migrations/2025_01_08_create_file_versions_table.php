@@ -10,7 +10,7 @@ class CreateFileVersionsTable extends Migration {
         Schema::create('file_versions', function (Blueprint $table) {
             $table->id();
             $table->foreignId('file_id')->constrained('files')->onDelete('cascade');
-            $table->string('version');
+            $table->string('version_number');
             $table->string('path');
             $table->string('filename');
             $table->string('mime_type')->nullable();
