@@ -25,6 +25,9 @@ class FileVersion extends Model
         'file_id',
         'version_number',
         'path',
+        'filename',
+        'mime_type',
+        'size',
         'metadata',
         'created_by',
     ];
