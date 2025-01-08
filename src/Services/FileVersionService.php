@@ -18,16 +18,25 @@ class FileVersionService
 
         return FileVersion::create([
            'file_id' => $fileId,
-            'version_number' => $versionNumber,
+            'version' => $versionNumber,
             'path' => $path,
+            'filename' => $file->getClientOriginalName(),
+            'mime_type' => $file->getMimeType(),
             'metadata' => $metadata,
+            'size' => $file->getSize(),
             'created_by' => auth()->id(),
         ]);
     }
 
-    public function getNextVersionNumber($fileId)
+    public function getNextVersionNumber($fileId): int|string
     {
         $latestVersion = FileVersion::where('file_id', $fileId)->orderBy('id', 'desc')->first();
-        return $latestVersion ? $latestVersion->version_number + 1 : 1;
+        return $latestVersion ? $this->incrementVersion($latestVersion->version) : 1;
+    }
+
+    private function incrementVersion($version): string
+    {
+        [$major, $minor] = explode('.', $version);
+        return $major . '.' . ($minor + 1);
     }
 }

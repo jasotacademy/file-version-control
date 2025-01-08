@@ -3,6 +3,7 @@
 namespace Jasotacademy\FileVersionControl\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Jasotacademy\FileVersionControl\Models\File;
 use Jasotacademy\FileVersionControl\Models\FileVersion;
 use Jasotacademy\FileVersionControl\Services\FileVersionService;
 
@@ -33,5 +34,10 @@ class FileVersionController extends Controller
     {
         $versions = FileVersion::where('file_id', $fileId)->get();
         return response()->json($versions);
+    }
+
+    public function getFileHistory(File $file)
+    {
+        return response()->json($file->versions);
     }
 }
