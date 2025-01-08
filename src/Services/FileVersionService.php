@@ -2,6 +2,7 @@
 
 namespace Jasotacademy\FileVersionControl\Services;
 
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Jasotacademy\FileVersionControl\Models\File;
 use Jasotacademy\FileVersionControl\Models\FileVersion;
@@ -32,7 +33,7 @@ class FileVersionService
     /**
      * @throws \Exception
      */
-    public function rollback(int $fileId, int $versionId): FileVersion
+    public function rollback(int $fileId, int $versionId, string $note = null): FileVersion
     {
         $version = FileVersion::where('file_id', $fileId)->findOrFail($versionId);
 
@@ -49,7 +50,7 @@ class FileVersionService
         Storage::disk($disk)->copy($version->path, $currentVersion->path);
 
         // Save a new version entry
-        return FileVersion::create([
+        $newVersion = FileVersion::create([
             'file_id' => $fileId,
             'version_number' => $currentVersion->version_number + 1,
             'path' => $version->path,
@@ -59,6 +60,17 @@ class FileVersionService
             'size' => $version->size,
             'created_by' => auth()->id(),
         ]);
+
+        DB::table('rollback_logs')->insert([
+            'file_version_id' => $newVersion->id,
+            'rolled_back_by' => auth()->id(),
+            'rolled_back_at' => now(),
+            'note' => $note,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        return $newVersion;
     }
 
     public function getNextVersionNumber($fileId): int|string
