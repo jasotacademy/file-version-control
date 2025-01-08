@@ -18,6 +18,7 @@ class FileVersionService
         Storage::disk($disk)->put($path, file_get_contents($file));
 
         return FileVersion::create([
+            'file_id' => $fileId,
             'version_number' => $versionNumber,
             'path' => $path,
             'filename' => $file->getClientOriginalName(),
@@ -28,35 +29,42 @@ class FileVersionService
         ]);
     }
 
-    public function rollbackToVersion(File $file, FileVersion $version): void
+    /**
+     * @throws \Exception
+     */
+    public function rollback(int $fileId, int $versionId): FileVersion
     {
-        if ($version->file_id !== $file->id) {
-            throw new \InvalidArgumentException("The version does not belong to the specified file.");
+        $version = FileVersion::where('file_id', $fileId)->findOrFail($versionId);
+
+        $currentVersion = FileVersion::where('file_id', $fileId)
+            ->orderBy('id', 'desc')
+            ->first();
+
+        if (!$currentVersion) {
+            throw new \Exception('No current version found for this file.');
         }
 
-        $file->update([
-            'path' => $version->path,
-            'size' => $version->size,
-            'mime_type' => $version->mime_type,
-        ]);
+        // Copy the selected version's file to the current version's path
+        $disk = config('file_version_control.storage_disk');
+        Storage::disk($disk)->copy($version->path, $currentVersion->path);
 
-        $file->versions()->create([
-            'version' => $this->getNextVersionNumber($file),
+        // Save a new version entry
+        return FileVersion::create([
+            'file_id' => $fileId,
+            'version_number' => $currentVersion->version_number + 1,
             'path' => $version->path,
             'filename' => $version->filename,
             'mime_type' => $version->mime_type,
+            'metadata' => ['rollback_from' => $version->id],
             'size' => $version->size,
-            'metadata' => [
-                'action' => 'rollback',
-                'rolled_back_to' => $version->version,
-            ],
+            'created_by' => auth()->id(),
         ]);
     }
 
     public function getNextVersionNumber($fileId): int|string
     {
         $latestVersion = FileVersion::where('file_id', $fileId)->orderBy('id', 'desc')->first();
-        return $latestVersion ? $this->incrementVersion($latestVersion->version) : 1;
+        return $latestVersion ? $latestVersion->version_number + 1 : 1;
     }
 
     private function incrementVersion($version): string

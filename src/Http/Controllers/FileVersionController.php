@@ -40,4 +40,19 @@ class FileVersionController extends Controller
     {
         return response()->json($file->versions);
     }
+
+    public function rollback($fileId, $versionId)
+    {
+        try {
+            $newVersion = $this->service->rollback($fileId, $versionId);
+            return response()->json([
+                'message' => 'File rollback successfully',
+                'version' => $newVersion
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => $e->getMessage()
+            ], 400);
+        }
+    }
 }
