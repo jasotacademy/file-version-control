@@ -18,6 +18,7 @@ class CreateFileVersionsTable extends Migration {
             $table->unsignedInteger('size')->nullable();
             $table->foreignId('created_by')->nullable()->constrained('users')->onDelete('set null');
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

@@ -4,6 +4,7 @@ namespace Jasotacademy\FileVersionControl\Tests\Feature;
 
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use Jasotacademy\FileVersionControl\Models\FileVersion;
 use Jasotacademy\FileVersionControl\Services\FileVersionService;
 use Jasotacademy\FileVersionControl\Tests\TestCase;
 
@@ -88,6 +89,39 @@ class FileVersionServiceTest extends TestCase
         $this->assertDatabaseHas('rollback_logs', [
             'file_version_id' => $rollbackVersion->id,
             'note' => 'Restoring to original',
+        ]);
+    }
+
+    public function test_it_shows_differences_between_file_versions()
+    {
+        Storage::fake('testing');
+        $file1 = UploadedFile::fake()->create('document.pdf')->storeAs('files/1', 'v1_document.txt', 'testing');
+        $file2 = UploadedFile::fake()->create('document.pdf')->storeAs('files/2', 'v2_1_document.txt', 'testing');
+
+        $version1 = FileVersion::create([
+            'file_id' => 1,
+            'version_number' => 1,
+            'path' => $file1,
+            'filename' => 'v1_document.txt',
+            'metadata' => ['author' => 'Author 1'],
+            'created_by' => 1,
+        ]);
+
+        $version2 = FileVersion::create([
+            'file_id' => 1,
+            'version_number' => 2,
+            'path' => $file2,
+            'filename' => 'v2_1_document.txt',
+            'metadata' => ['author' => 'Author 2'],
+            'created_by' => 1,
+        ]);
+
+        $response = $this->getJson("/file-version-control/file-version/diff/{$version1->id}/{$version2->id}");
+
+        $response->assertJsonStructure([
+            'text_diff',
+            'path_diff',
+            'metadata_diff',
         ]);
     }
 }

@@ -3,6 +3,7 @@
 namespace Jasotacademy\FileVersionControl\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\DB;
 use Jasotacademy\FileVersionControl\Models\File;
 use Jasotacademy\FileVersionControl\Models\FileVersion;
@@ -72,8 +73,9 @@ class FileVersionController extends Controller
 
     public function diff($versionId1, $versionId2)
     {
+        var_dump('hello');
         $diffService = app(FileVersionDiffService::class);
-        $diff = $diffService->diff($versionId1, $versionId2);
+        $diff = $diffService->getDiff($versionId1, $versionId2);
 
         return response()->json($diff);
     }
