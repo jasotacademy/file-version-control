@@ -9,4 +9,6 @@ Route::prefix('file-version-control')->group(function () {
     Route::post('/file/{fileId}/rollback/{versionId}', [FileVersionController::class, 'rollback']);
 
     Route::get('/file/{fileId}/rollback-logs', [FileVersionController::class, 'getRollbackLogs']);
+    Route::get('/file-version/diff/{version1Id}/{version2Id}', [FileVersionController::class, 'diff']);
+
 });

@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Jasotacademy\FileVersionControl\Models\File;
 use Jasotacademy\FileVersionControl\Models\FileVersion;
+use Jasotacademy\FileVersionControl\Services\FileVersionDiffService;
 use Jasotacademy\FileVersionControl\Services\FileVersionService;
 
 class FileVersionController extends Controller
@@ -67,5 +68,13 @@ class FileVersionController extends Controller
                     ->get();
 
         return response()->json($logs);
+    }
+
+    public function diff($versionId1, $versionId2)
+    {
+        $diffService = app(FileVersionDiffService::class);
+        $diff = $diffService->diff($versionId1, $versionId2);
+
+        return response()->json($diff);
     }
 }
