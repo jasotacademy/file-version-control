@@ -60,4 +60,34 @@ class FileVersionServiceTest extends TestCase
             'metadata' => json_encode(['rollback_from' => $initialVersion->id]),
         ]);
     }
+
+    /**
+     * @throws \Exception
+     */
+    public function test_it_logs_a_rollback_action()
+    {
+        Storage::fake('testing');
+
+        $fileId = 1;
+        $file = UploadedFile::fake()->create('document.pdf', 100);
+
+        $service = app(FileVersionService::class);
+
+        // upload initial version
+        $initialVersion = $service->uploadVersion($file, $fileId);
+
+        // upload new version
+        $updatedFile = UploadedFile::fake()->create('document_updated.pdf', 150);
+        $newVersion = $service->uploadVersion($updatedFile, $fileId);
+
+
+        // Rollback to initial version
+        $rollbackVersion = $service->rollback($fileId, $initialVersion->id, 'Restoring to original');
+
+        // Assert rollback log is created
+        $this->assertDatabaseHas('rollback_logs', [
+            'file_version_id' => $rollbackVersion->id,
+            'note' => 'Restoring to original',
+        ]);
+    }
 }

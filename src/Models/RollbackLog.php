@@ -10,6 +10,13 @@ class RollbackLog extends Model
 {
     use HasFactory;
 
+    /**
+     * The table associated with the model.
+     *
+     * @var string
+     */
+    protected $table = 'rollback_logs';
+
     protected $fillable = [
         'file_version_id',
         'rolled_back_by',
