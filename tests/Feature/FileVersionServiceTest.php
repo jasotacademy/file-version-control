@@ -124,4 +124,35 @@ class FileVersionServiceTest extends TestCase
             'metadata_diff',
         ]);
     }
+
+    public function test_it_soft_deletes_a_version()
+    {
+        $version = FileVersion::factory()->create();
+
+        $version->softDelete();
+
+        $this->assertSoftDeleted('file_versions', ['id' => $version->id]);
+    }
+
+    public function test_it_restores_a_soft_deleted_version()
+    {
+        $version = FileVersion::factory()->create();
+        $version->softDelete();
+
+        $version->restoreVersion();
+
+        $this->assertDatabaseHas('file_versions', [
+            'id' => $version->id,
+            'deleted_at' => null,
+        ]);
+    }
+
+    public function test_it_force_deletes_a_version_fluently()
+    {
+        $version = FileVersion::factory()->create();
+
+        $version->forceDeleteVersion();
+
+        $this->assertDatabaseMissing('file_versions', ['id' => $version->id]);
+    }
 }

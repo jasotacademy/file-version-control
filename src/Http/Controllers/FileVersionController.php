@@ -79,4 +79,20 @@ class FileVersionController extends Controller
 
         return response()->json($diff);
     }
+
+    public function delete($id)
+    {
+        $version = FileVersion::findOrFail($id);
+        $version->delete();
+
+        return response()->json(['message' => 'Version soft-deleted successfully.']);
+    }
+
+    public function restore($id)
+    {
+        $version = FileVersion::onlyTrashed()->findOrFail($id);
+        $version->restore();
+
+        return response()->json(['message' => 'Version restored successfully.']);
+    }
 }

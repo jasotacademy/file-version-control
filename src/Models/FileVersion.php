@@ -2,9 +2,11 @@
 
 namespace Jasotacademy\FileVersionControl\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Jasotacademy\FileVersionControl\Database\Factories\FileVersionFactory;
 
 class FileVersion extends Model
 {
@@ -42,4 +44,66 @@ class FileVersion extends Model
         'metadata' => 'array',
     ];
 
+    protected static function newFactory(): FileVersionFactory
+    {
+        return FileVersionFactory::new();
+    }
+
+    /**
+     * Soft delete this version fluently.
+     *
+     * @return $this
+     */
+    public function softDelete(): static
+    {
+        $this->delete();
+
+        return $this;
+    }
+
+    /**
+     * Restore this version fluently.
+     *
+     * @return $this
+     */
+    public function restoreVersion(): static
+    {
+        $this->restore();
+
+        return $this;
+    }
+
+    /**
+     * Permanently delete this version fluently.
+     *
+     * @return $this
+     */
+    public function forceDeleteVersion(): static
+    {
+        $this->forceDelete();
+
+        return $this;
+    }
+
+    /**
+     * Scope to include soft-deleted records.
+     *
+     * @param Builder $query
+     * @return Builder
+     */
+    public function scopeWithSoftDeleted(Builder $query): Builder
+    {
+        return $query->withTrashed();
+    }
+
+    /**
+     * Scope to only include soft-deleted records.
+     *
+     * @param Builder $query
+     * @return Builder
+     */
+    public function scopeOnlySoftDeleted(Builder $query): Builder
+    {
+        return $query->onlyTrashed();
+    }
 }
