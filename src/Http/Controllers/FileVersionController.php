@@ -3,6 +3,7 @@
 namespace Jasotacademy\FileVersionControl\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Jasotacademy\FileVersionControl\Models\File;
 use Jasotacademy\FileVersionControl\Models\FileVersion;
 use Jasotacademy\FileVersionControl\Services\FileVersionService;
@@ -54,5 +55,17 @@ class FileVersionController extends Controller
                 'error' => $e->getMessage()
             ], 400);
         }
+    }
+
+    public function getRollbackLogs($fileId)
+    {
+        $logs = DB::table('rollback_logs')
+                    ->join('file_versions', 'rollback_logs.file_version_id', '=', 'file_versions.id')
+                    ->where('file_versions.file_id', $fileId)
+                    ->select('rollback_logs.*', 'file_versions.version_number', 'file_versions.path')
+                    ->orderBy('rollback_logs.rolled_back_at', 'desc')
+                    ->get();
+
+        return response()->json($logs);
     }
 }
